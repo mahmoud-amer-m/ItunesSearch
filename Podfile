@@ -9,7 +9,5 @@ target 'ItunesSearch' do
     pod 'Alamofire', '~> 4.4'
     pod 'SDWebImage', '~> 4.0'
     pod 'ReachabilitySwift'
-    pod 'RxSwift'
-    pod 'RxCocoa'
     pod 'IQKeyboardManagerSwift','~>6.1.1'
 end

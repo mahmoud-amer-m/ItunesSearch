@@ -9,9 +9,10 @@
 import UIKit
 
 class BaseViewController: UIViewController {
+
     let loadingView: UIView = UIView()
     var loadingIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
-
+    
     func showLoading() {
         loadingView.frame = view.bounds
         loadingView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.7)

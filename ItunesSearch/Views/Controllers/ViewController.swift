@@ -7,21 +7,9 @@
 //
 
 import UIKit
-import RxCocoa
-import RxSwift
 
-enum ViewState {
-    case none
-    case finishedLoadingWithError(error: String)
-    case loading
-    case finishedLoadingSuccessfully(baseModel: [[String: SearchBaseModel]])
-}
-
-class ViewController: BaseViewController, UICollectionViewDelegate, UICollectionViewDataSource {
-    var viewState = Dynamic(ViewState.none)
-    var baseSearchModel = [[String: SearchBaseModel]]()
+class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     var selectedEntities: [String] = []
-    let dispatchGroup = DispatchGroup()
     
     @IBOutlet weak var mainView: UIView!
     @IBOutlet weak var searchTexhField: UITextField!
@@ -29,32 +17,15 @@ class ViewController: BaseViewController, UICollectionViewDelegate, UICollection
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        addItunesLogoToNavigation()
-        viewState.bind {[weak self] (state) in
-            DispatchQueue.main.async {
-                switch state {
-                case .loading:
-                    self?.showLoading()
-                case .finishedLoadingWithError(let error):
-                    self?.hideLoadingView()
-                case .finishedLoadingSuccessfully(let baseModel):
-                    self?.hideLoadingView()
-                    self?.goToResults()
-                case .none:
-                    print("none")
-                }
-            }
-        }
         
         let layout = DynamicSizeUICollectionViewFlowLayout()
         layout.Direction = .vertical
+        layout.sectionInset = UIEdgeInsets(top: 4, left: 0, bottom: 4, right: 0)
+//        layout.itemSize = CGSize(width: screenWidth/3, height: screenWidth/3)
+        layout.minimumInteritemSpacing = 4
+        layout.minimumLineSpacing = 4
+        
         collectionView.collectionViewLayout = layout
-    }
-    
-    func goToResults() {
-        let resultsController: ResultsViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "ResultsViewController") as! ResultsViewController
-        resultsController.reloadResults(model: baseSearchModel)
-        navigationController?.pushViewController(resultsController, animated: true)
     }
 
     override func didReceiveMemoryWarning() {
@@ -77,57 +48,40 @@ class ViewController: BaseViewController, UICollectionViewDelegate, UICollection
     }
     
     @IBAction func searchiTuens(_ sender: UIButton) {
-        if let searchText = searchTexhField.text, searchText.count > 0, selectedEntities.count > 0 {
-            viewState.value = .loading
-            
-            selectedEntities.forEach { (entity) in
-                dispatchGroup.enter()
-                ServicesManager.searchAPI(entity: entity, searchKeywork: searchText, completion: { [weak self] (searchModel) in
-                    self?.baseSearchModel.append([entity: searchModel])
-                    self?.dispatchGroup.leave()
-                }) { (error) in
-                    self.dispatchGroup.leave()
-                }
-                dispatchGroup.notify(queue: .main) { [weak self] in
-                    self?.hideLoadingView()
-                    if let results = self?.baseSearchModel {
-                        self?.viewState.value = .finishedLoadingSuccessfully(baseModel: results)
-                    }
-                    
-                    print("Both functions complete 👍")
-                }
-
-            }
+        if let keyword = searchTexhField.text,
+            keyword.count > 0,
+            selectedEntities.count > 0 {
+            let resultsController: ResultsViewController = UIStoryboard(name: "Main",
+                                                                        bundle: nil).instantiateViewController(withIdentifier: "ResultsViewController") as! ResultsViewController
+            resultsController.search(entities: selectedEntities, keyword: keyword)
+            navigationController?.pushViewController(resultsController, animated: true)
         }
     }
-    
-    
-    
 }
 
 // MARK: - UICollectionViewDataSource
 extension ViewController {
-    //1
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
     
-    //2
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let size = (selectedEntities[indexPath.item] as NSString).size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize:18.0)])
+
+        return CGSize(width: size.width, height: size.height + 4)
+    }
+    
     func collectionView(_ collectionView: UICollectionView,
                                  numberOfItemsInSection section: Int) -> Int {
         return selectedEntities.count
     }
     
-    //3
     func collectionView(_ collectionView: UICollectionView,
                                  cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "entitiesIdCell",
                                                       for: indexPath) as! CollectionViewCell
         cell.backgroundColor = UIColor(red: 28/255, green: 135/255, blue: 212/255, alpha: 1)
         cell.cellLabel.text = selectedEntities[indexPath.item]
-        // Configure the cell
         return cell
     }
 }
-
-

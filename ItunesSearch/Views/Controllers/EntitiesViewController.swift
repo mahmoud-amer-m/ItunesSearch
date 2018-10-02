@@ -31,7 +31,6 @@ class EntitiesViewController: UITableViewController {
         return entities.count
     }
     
-    // MARK: - History Table View Delegate
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CellIdentifier", for: indexPath)
         cell.textLabel?.text = entities[indexPath.row]

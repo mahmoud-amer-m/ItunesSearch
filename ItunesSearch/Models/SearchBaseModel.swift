@@ -1,3 +1,5 @@
+
+
 import Foundation
 struct SearchBaseModel : Codable {
 	let resultCount : Int?
