@@ -21,16 +21,10 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         let layout = DynamicSizeUICollectionViewFlowLayout()
         layout.Direction = .vertical
         layout.sectionInset = UIEdgeInsets(top: 4, left: 0, bottom: 4, right: 0)
-//        layout.itemSize = CGSize(width: screenWidth/3, height: screenWidth/3)
         layout.minimumInteritemSpacing = 4
         layout.minimumLineSpacing = 4
         
         collectionView.collectionViewLayout = layout
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 
     @IBAction func showEntities(_ sender: UIButton) {

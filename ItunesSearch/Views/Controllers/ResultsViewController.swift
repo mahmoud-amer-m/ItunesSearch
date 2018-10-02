@@ -32,7 +32,7 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
     override func viewDidLoad() {
         super.viewDidLoad()
         addItunesLogoToNavigation()
-        tableView.contentInset = UIEdgeInsetsMake(20.0, 0.0, 0.0, 0.0)
+        tableView.contentInset = UIEdgeInsetsMake(0.0, 0.0, 0.0, 0.0)
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = UITableViewAutomaticDimension
         
