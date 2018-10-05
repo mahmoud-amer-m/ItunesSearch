@@ -11,7 +11,7 @@ import UIKit
 enum ViewState {
     case loading
     case finishedLoadingWithError(error: String)
-    case finishedLoadingSuccessfully(results: [[String: SearchBaseModel]])
+    case finishedLoadingSuccessfully(results: NSMutableArray)
     case finishedLoadingEmptyResults
 }
 
@@ -22,7 +22,8 @@ enum listingStyle {
 
 class ResultsViewController: BaseViewController, UITableViewDelegate, UITableViewDataSource {
     var selectedEntities: [String] = []
-    var results: [[String: SearchBaseModel]] = []
+    var results: NSMutableArray?
+    var errorsArray: NSMutableArray?
     var keyword: String?
     var viewState = Dynamic(ViewState.loading)
     var listingStyle: listingStyle = .grid
@@ -67,25 +68,43 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
         
         let downloadGroup = DispatchGroup()
         let _ = DispatchQueue.global(qos: .userInitiated)
-        var response: [[String: SearchBaseModel]] = []
-        DispatchQueue.concurrentPerform(iterations: selectedEntities.count) { index in
-            downloadGroup.enter()
-            let entity = entities[index]
-            ServicesManager.searchAPI(entity: entity, searchKeywork: keyword, completion: { (searchModel) in
-                response.append([entity: searchModel])
-                downloadGroup.leave()
-            }) { (error) in
-                downloadGroup.leave()
+
+        let queue = DispatchQueue(label: "myQueue", qos: .userInteractive, attributes: .concurrent)
+        queue.async {
+            DispatchQueue.concurrentPerform(iterations: self.selectedEntities.count) {
+                index in
+                self.results = NSMutableArray()
+                self.errorsArray = NSMutableArray()
+                downloadGroup.enter()
+                let entity = entities[index]
+                let parameters: [String: Any] = ["term": keyword, "entity" : entity]
+                ServicesManager.searchAPI(entity: entity, parameters: parameters, completion: { (searchModel) in
+                    self.results?.add(searchModel)
+                    downloadGroup.leave()
+                }) { (error) in
+                    self.errorsArray?.add(error)
+                    downloadGroup.leave()
+                }
+                downloadGroup.notify(queue: DispatchQueue.main) {
+                    if let searchResults = self.results,
+                        searchResults.count > 0 {
+                        self.viewState.value = .finishedLoadingSuccessfully(results: searchResults)
+                    } else {
+                        DispatchQueue.main.async {
+                            self.hideLoadingView()
+                            self.showAlert(title: "erro", message: "Empty Results", buttonTitle: "Try Again", action: { _ in
+                                self.search(entities: self.selectedEntities, keyword: self.keyword ?? "")
+                            })
+                        }
+                    }
+                    
+                }
             }
         }
-        downloadGroup.notify(queue: DispatchQueue.main) {
-            if response.count > 0 {
-                self.viewState.value = .finishedLoadingSuccessfully(results: response)
-            } else {
-                
-            }
+        DispatchQueue.concurrentPerform(iterations: selectedEntities.count) { index in
             
         }
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -108,9 +127,6 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
 }
 
 extension ResultsViewController {
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableViewAutomaticDimension
-    }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return selectedEntities[section]
@@ -123,32 +139,52 @@ extension ResultsViewController {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
-    
+
     // MARK: - History Table View Delegate
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TableCollectionCell", for: indexPath) as! TableCollectionCell
-        if results.count > 0 {
-            cell.searchResult = results[indexPath.row][selectedEntities[indexPath.section]]
-            cell.collectionCell.reloadData()
-            switch listingStyle {
-            case .grid:
-                cell.cellIdentifier = "ImageCell"
-            case .list:
-                cell.cellIdentifier = "ListImageCell"
+        if let count = results?.count,
+            count > indexPath.section,
+            let sectionResults = results?[indexPath.section] as? SearchBaseModel {
+            return constructCellWith(tableView: tableView, at: indexPath, resultArray: sectionResults)
+        } else {
+            if let errors = errorsArray,
+                errors.count > indexPath.section,
+                let error: String = errors[indexPath.section] as? String {
+                return constructEmptyCell(tableView: tableView, at: indexPath, message: error)
+            } else {
+                return constructEmptyCell(tableView: tableView, at: indexPath, message: "Empty Results")
             }
-            cell.listingStyle = listingStyle
-            cell.navigateToItem = { [weak self] (result) in
-                let detailsVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "ItemDetailsViewController") as! ItemDetailsViewController
-                detailsVC.result = result
-                self?.navigationController?.pushViewController(detailsVC, animated: true)
-            }
-            cell.layoutIfNeeded()
+            
         }
-        
-        return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
        
+    }
+    
+    func constructCellWith(tableView: UITableView, at  indexPath: IndexPath, resultArray: SearchBaseModel) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "TableCollectionCell", for: indexPath) as! TableCollectionCell
+        cell.searchResult = resultArray
+        
+        switch listingStyle {
+        case .grid:
+            cell.cellIdentifier = "ImageCell"
+        case .list:
+            cell.cellIdentifier = "ListImageCell"
+        }
+        cell.listingStyle = listingStyle
+        cell.navigateToItem = { [weak self] (result) in
+            let detailsVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "ItemDetailsViewController") as! ItemDetailsViewController
+            detailsVC.result = result
+            self?.navigationController?.pushViewController(detailsVC, animated: true)
+        }
+        cell.layoutIfNeeded()
+        return cell
+    }
+    
+    func constructEmptyCell(tableView: UITableView, at  indexPath: IndexPath, message: String) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "MessageCell", for: indexPath) as! MessageTableViewCell
+        cell.messageText = message
+        return cell
     }
 }

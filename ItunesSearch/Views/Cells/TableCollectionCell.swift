@@ -10,7 +10,11 @@ import UIKit
 import SDWebImage
 
 class TableCollectionCell: UITableViewCell, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    var searchResult: SearchBaseModel?
+    var searchResult: SearchBaseModel? {
+        didSet {
+            collectionCell.reloadData()
+        }
+    }
     var cellIdentifier: String = "ImageCell"
     var listingStyle: listingStyle = .grid
     var navigateToItem: ((Results) -> Void)?
@@ -43,11 +47,9 @@ extension TableCollectionCell {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         switch listingStyle {
         case .grid:
-            return CGSize(width: (collectionCell.frame.width / 3) - 8, height: 200)
+            return CGSize(width: (collectionCell.frame.width / 3) - 8, height: 116)
         case .list:
-            return CGSize(width: collectionCell.frame.width - 8, height: 200)
-        default:
-            return CGSize(width: (collectionCell.frame.width / 3) - 8, height: 200)
+            return CGSize(width: collectionCell.frame.width - 8, height: 116)
         }
     }
     

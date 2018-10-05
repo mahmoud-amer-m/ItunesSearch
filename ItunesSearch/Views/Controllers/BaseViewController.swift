@@ -35,5 +35,12 @@ class BaseViewController: UIViewController {
         imageView.image = logo
         navigationItem.titleView = imageView
     }
+    
+    func showAlert(title: String, message: String, buttonTitle: String, action: @escaping (UIAlertAction)->()) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+        alert.addAction(UIAlertAction(title: buttonTitle, style: UIAlertActionStyle.default, handler: action))
+        self.present(alert, animated: true, completion: nil)
+    }
 
 }

@@ -60,7 +60,7 @@ extension ViewController {
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let size = (selectedEntities[indexPath.item] as NSString).size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize:18.0)])
+        let size = (selectedEntities[indexPath.item] as NSString).size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize:20)])
 
         return CGSize(width: size.width, height: size.height + 4)
     }

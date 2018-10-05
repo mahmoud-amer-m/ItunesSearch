@@ -13,7 +13,6 @@
 		D6B729CE2162B75F001021BE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B729CD2162B75F001021BE /* AppDelegate.swift */; };
 		D6B729D02162B75F001021BE /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B729CF2162B75F001021BE /* ViewController.swift */; };
 		D6B729D32162B75F001021BE /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D6B729D12162B75F001021BE /* Main.storyboard */; };
-		D6B729D52162B760001021BE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D6B729D42162B760001021BE /* Assets.xcassets */; };
 		D6B729D82162B760001021BE /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D6B729D62162B760001021BE /* LaunchScreen.storyboard */; };
 		D6B729E22162B7A6001021BE /* APIConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B729E02162B7A6001021BE /* APIConstants.swift */; };
 		D6B729E52162B7CD001021BE /* ServiceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6B729E42162B7CD001021BE /* ServiceManager.swift */; };
@@ -27,6 +26,8 @@
 		D6C9D3712162D9DF0055C45B /* EntitiesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C9D3702162D9DF0055C45B /* EntitiesViewController.swift */; };
 		D6C9D3732162E1B60055C45B /* CollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C9D3722162E1B60055C45B /* CollectionViewCell.swift */; };
 		D6C9D3782162E3CE0055C45B /* ResultsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C9D3772162E3CE0055C45B /* ResultsViewController.swift */; };
+		D6F993002167F6E200EE3175 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D6B729D42162B760001021BE /* Assets.xcassets */; };
+		D6F99302216803F800EE3175 /* MessageTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6F99301216803F800EE3175 /* MessageTableViewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		D6C9D3702162D9DF0055C45B /* EntitiesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitiesViewController.swift; sourceTree = "<group>"; };
 		D6C9D3722162E1B60055C45B /* CollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewCell.swift; sourceTree = "<group>"; };
 		D6C9D3772162E3CE0055C45B /* ResultsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsViewController.swift; sourceTree = "<group>"; };
+		D6F99301216803F800EE3175 /* MessageTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageTableViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,6 +175,7 @@
 				D6C0E2522163FE090047D371 /* TableCollectionCell.swift */,
 				D6C0E2582164083A0047D371 /* ImageCollectionViewCell.swift */,
 				D6C0E25C2164222E0047D371 /* ListCollectionViewCell.swift */,
+				D6F99301216803F800EE3175 /* MessageTableViewCell.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -247,7 +250,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D6B729D82162B760001021BE /* LaunchScreen.storyboard in Resources */,
-				D6B729D52162B760001021BE /* Assets.xcassets in Resources */,
+				D6F993002167F6E200EE3175 /* Assets.xcassets in Resources */,
 				D6B729D32162B75F001021BE /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -311,6 +314,7 @@
 				D6C9D3782162E3CE0055C45B /* ResultsViewController.swift in Sources */,
 				D6C9D3732162E1B60055C45B /* CollectionViewCell.swift in Sources */,
 				D6C0E25B216421610047D371 /* ItemDetailsViewController.swift in Sources */,
+				D6F99302216803F800EE3175 /* MessageTableViewCell.swift in Sources */,
 				D6C9D3712162D9DF0055C45B /* EntitiesViewController.swift in Sources */,
 				D6B729D02162B75F001021BE /* ViewController.swift in Sources */,
 				D6C0E257216406120047D371 /* BaseViewController.swift in Sources */,

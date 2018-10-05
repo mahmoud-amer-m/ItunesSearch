@@ -14,35 +14,31 @@ import Reachability
 
 class ServicesManager {
     
-    public static func searchAPI(entity: String, searchKeywork: String, completion: @escaping (SearchBaseModel)->(), error: @escaping (String)->()) {
+    public static func searchAPI(entity: String, parameters: [String: Any], completion: @escaping (SearchBaseModel)->(), error: @escaping (String)->()) {
         
         let reachability = Reachability()
         if reachability?.connection == .none ||  reachability?.connection.description == "No Connection"{
-            
+            error(APIError.networkError.rawValue)
         } else {
-            var url: String = "\(APIConstants.baseSearchURL.rawValue)term=\(searchKeywork)&entity=\(entity)"
-            url = url.replacingOccurrences(of: " ", with: "+")
-            print("url : \(url)")
-            Alamofire.request(url, method: .get, encoding: JSONEncoding.default)
-                .responseJSON { response in
-                    //First, check for request error
+            
+            Alamofire.request(APIConstants.baseSearchURL.rawValue, method: .get, parameters: parameters, encoding: URLEncoding.queryString, headers: [:])
+                .responseData { response in
                     if let requestError = response.error {
                         error(requestError.localizedDescription)
                         return
                     }
-                    
-                    if let data = response.data, let _ = String(data: data, encoding: .utf8) {
-                        if let baseModel = try? JSONDecoder().decode(SearchBaseModel.self, from: data) {
-                            completion(baseModel)
-                        } else {
-                            //Json Error
-                            error(DeliveryError.jsonError.rawValue)
-                        }
-                    } else {
-                        //No response from server
-                        error(DeliveryError.noResponseError.rawValue)
+                    guard let jsonData = response.value else {
+                        return
                     }
-            }
+                    if let baseModel = try? JSONDecoder().decode(SearchBaseModel.self, from: jsonData),
+                        let results = baseModel.results,
+                        !results.isEmpty{
+                        completion(baseModel)
+                    } else {
+                        //Json Error
+                        error(APIError.jsonError.rawValue)
+                    }
+                }
         }
     }
 }

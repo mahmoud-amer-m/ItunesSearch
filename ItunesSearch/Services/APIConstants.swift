@@ -10,15 +10,15 @@ import Foundation
 import UIKit
 
 public enum APIConstants: String {
-    case baseSearchURL = "https://itunes.apple.com/search?"
+    case baseSearchURL = "https://itunes.apple.com/search"
 }
 
 public class UIConstants {
     public static var tableViewCellEstimatedHeight: CGFloat = 50
 }
 
-enum DeliveryError: String {
+enum APIError: String {
     case networkError = "No internet connection"
-    case jsonError = "Error decoding json"
+    case jsonError = "Sorry, Something went wrong :("
     case noResponseError = "No response from server"
 }
