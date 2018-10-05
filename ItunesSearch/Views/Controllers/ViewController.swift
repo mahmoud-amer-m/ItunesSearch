@@ -41,7 +41,7 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         navigationController?.pushViewController(entitiesController, animated: true)
     }
     
-    @IBAction func searchiTuens(_ sender: UIButton) {
+    @IBAction func searchiTunes(_ sender: UIButton) {
         if let keyword = searchTexhField.text,
             keyword.count > 0,
             selectedEntities.count > 0 {

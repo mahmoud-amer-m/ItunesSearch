@@ -156,7 +156,7 @@
                                             </userDefinedRuntimeAttribute>
                                         </userDefinedRuntimeAttributes>
                                         <connections>
-                                            <action selector="searchiTuens:" destination="BYZ-38-t0r" eventType="touchUpInside" id="FZU-kc-Qr2"/>
+                                            <action selector="searchiTunes:" destination="BYZ-38-t0r" eventType="touchUpInside" id="FZU-kc-Qr2"/>
                                         </connections>
                                     </button>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Search for variety of content from the itunes store." textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MIb-yz-EEA">
