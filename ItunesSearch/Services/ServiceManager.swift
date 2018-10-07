@@ -18,7 +18,7 @@ class ServicesManager {
         
         let reachability = Reachability()
         if reachability?.connection == .none ||  reachability?.connection.description == "No Connection"{
-            apiError(APIError.networkError.rawValue)
+            apiError(ErrorsConstants.networkError.rawValue)
         } else {
             
             Alamofire.request(APIConstants.baseSearchURL.rawValue, method: .get, parameters: parameters, encoding: URLEncoding.queryString, headers: [:])
@@ -34,7 +34,7 @@ class ServicesManager {
                         let baseModel = try JSONDecoder().decode(SearchBaseModel.self, from: jsonData)
                         guard let results = baseModel.results,
                             !results.isEmpty else {
-                                apiError(String.init(format: APIError.noResponseError.rawValue, (parameters["term"] as? CVarArg) ?? ""))
+                                apiError(String.init(format: ErrorsConstants.noResponseError.rawValue, (parameters["term"] as? CVarArg) ?? ""))
                                 return
                         }
                         completion(baseModel)

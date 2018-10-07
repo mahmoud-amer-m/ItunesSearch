@@ -21,7 +21,7 @@ enum listingStyle {
 }
 
 class ResultsViewController: BaseViewController, UITableViewDelegate, UITableViewDataSource {
-    var selectedEntities: [String] = [] // Entites selected from home screen
+    var selectedEntities: [String]?
     var keyword: String?  // Search keyword from home screen
     
     var results: NSMutableArray? // Search results Array
@@ -64,22 +64,24 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        tableView.delegate = self
+        tableView.dataSource = self
+        search()
         super.viewWillAppear(animated)
     }
     
-    func search(entities: [String], keyword: String) {
-        selectedEntities = entities
-        self.keyword = keyword
-        
+    func search() {
+        guard let categories: [String] = selectedEntities else {return}
+        guard categories.count > 0 else {return}
         let searchGroup = DispatchGroup()
         results = NSMutableArray()
         errorsArray = NSMutableArray()
         
-        for (index, entity) in selectedEntities.enumerated() {
+        for (index, entity) in categories.enumerated() {
             searchGroup.enter()
-            let parameters: [String: Any] = ["term": keyword, "entity" : entity]
+            let parameters: [String: Any] = ["term": keyword ?? "", "entity" : entity]
             ServicesManager.searchAPI(entity: entity, parameters: parameters, completion: { (searchModel) in
-                self.results?.add(searchModel)
+                self.results?.add(["index" : index, "searchModel": searchModel])
                 searchGroup.leave()
             }) { (error) in
                 self.errorsArray?.add(["index" : index, "error": error])
@@ -91,13 +93,11 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
                 searchResults.count > 0 {
                 self.viewState.value = .finishedLoadingSuccessfully(results: searchResults)
             } else {
-                DispatchQueue.main.async {
-                    self.hideLoadingView()
-                    self.showAlert(title: "error", message: "Empty Results", buttonTitle: "Try Again", action: { _ in
-                        self.showLoading()
-                        self.search(entities: self.selectedEntities, keyword: self.keyword ?? "")
-                    })
-                }
+                self.hideLoadingView()
+                self.showAlert(title: "error", message: "Empty Results", buttonTitle: "Try Again", action: { _ in
+                    self.showLoading()
+                    self.search()
+                })
             }
         }
     }
@@ -124,11 +124,11 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
 extension ResultsViewController {
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return selectedEntities[section]
+        return selectedEntities?[section] ?? ""
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return selectedEntities.count
+        return selectedEntities?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -137,10 +137,9 @@ extension ResultsViewController {
 
     // MARK: - History Table View Delegate
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let count = results?.count,
-            count > indexPath.section,
-            let sectionResults = results?[indexPath.section] as? SearchBaseModel {
-            return constructCellWith(tableView: tableView, at: indexPath, resultArray: sectionResults)
+        if let sectionResults: [[String : Any]] = results as? [[String : Any]],
+            let result = sectionResults.filter( { ($0["index"] as! Int) == indexPath.section } ).first {
+            return constructCellWith(tableView: tableView, at: indexPath, resultArray: result["searchModel"] as? SearchBaseModel)
         } else {
             if let errors: [[String : Any]] = errorsArray as? [[String : Any]],
                 let error: [String : Any] = errors.filter( { ($0["index"] as! Int) == indexPath.section } ).first {
@@ -156,9 +155,10 @@ extension ResultsViewController {
        
     }
     
-    func constructCellWith(tableView: UITableView, at  indexPath: IndexPath, resultArray: SearchBaseModel) -> UITableViewCell {
+    func constructCellWith(tableView: UITableView, at  indexPath: IndexPath, resultArray: SearchBaseModel?) -> UITableViewCell {
+        guard let result = resultArray else { return UITableViewCell() }
         let cell = tableView.dequeueReusableCell(withIdentifier: "TableCollectionCell", for: indexPath) as! TableCollectionCell
-        cell.searchResult = resultArray
+        cell.searchResult = result
         
         switch listingStyle {
         case .grid:
@@ -168,7 +168,7 @@ extension ResultsViewController {
         }
         cell.listingStyle = listingStyle
         cell.navigateToItem = { [weak self] (result) in
-            let detailsVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "ItemDetailsViewController") as! ItemDetailsViewController
+            let detailsVC = UIStoryboard(name: UIConstants.storyBoard, bundle: nil).instantiateViewController(withIdentifier: "ItemDetailsViewController") as! ItemDetailsViewController
             detailsVC.result = result
             self?.navigationController?.pushViewController(detailsVC, animated: true)
         }

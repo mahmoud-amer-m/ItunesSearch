@@ -14,11 +14,13 @@ public enum APIConstants: String {
 }
 
 public class UIConstants {
-    public static var tableViewCellEstimatedHeight: CGFloat = 50
+    public static let storyBoard: String = "Main"
 }
 
-enum APIError: String {
+enum ErrorsConstants: String {
     case networkError = "No internet connection"
     case jsonError = "Sorry, Something went wrong :("
     case noResponseError = "No results found for your search %@"
+    case missingEnterdDataMessage = "Please write search text and select at least one category"
+    case missingEnterdDataTitle = "Missing Data"
 }

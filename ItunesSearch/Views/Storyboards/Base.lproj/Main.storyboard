@@ -463,10 +463,6 @@
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
-                                <connections>
-                                    <outlet property="dataSource" destination="6jB-WF-e5l" id="kEc-s5-a0g"/>
-                                    <outlet property="delegate" destination="6jB-WF-e5l" id="gqK-QF-eEW"/>
-                                </connections>
                             </tableView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

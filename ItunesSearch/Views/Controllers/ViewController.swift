@@ -15,6 +15,8 @@ class ViewController: BaseViewController, UICollectionViewDelegate, UICollection
     @IBOutlet weak var searchTexhField: UITextField!
     @IBOutlet weak var collectionView: UICollectionView!
     
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -28,7 +30,7 @@ class ViewController: BaseViewController, UICollectionViewDelegate, UICollection
     }
 
     @IBAction func showEntities(_ sender: UIButton) {
-        let entitiesController: EntitiesViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "EntitiesViewController") as! EntitiesViewController
+        let entitiesController: EntitiesViewController = UIStoryboard(name: UIConstants.storyBoard, bundle: nil).instantiateViewController(withIdentifier: "EntitiesViewController") as! EntitiesViewController
         entitiesController.setEntities = { [weak self] entities in
             print(entities)
             self?.selectedEntities = entities
@@ -45,12 +47,13 @@ class ViewController: BaseViewController, UICollectionViewDelegate, UICollection
         if let keyword = searchTexhField.text,
             keyword.count > 0,
             selectedEntities.count > 0 {
-            let resultsController: ResultsViewController = UIStoryboard(name: "Main",
+            let resultsController: ResultsViewController = UIStoryboard(name: UIConstants.storyBoard,
                                                                         bundle: nil).instantiateViewController(withIdentifier: "ResultsViewController") as! ResultsViewController
-            resultsController.search(entities: selectedEntities, keyword: keyword)
+            resultsController.keyword = keyword
+            resultsController.selectedEntities = selectedEntities
             navigationController?.pushViewController(resultsController, animated: true)
         } else {
-            showAlert(title: "Missing Data", message: "Please write search text and select at least one category", buttonTitle: "Ok", action: nil)
+            showAlert(title: ErrorsConstants.missingEnterdDataTitle.rawValue, message: ErrorsConstants.missingEnterdDataMessage.rawValue, buttonTitle: "Ok", action: nil)
         }
     }
 }
