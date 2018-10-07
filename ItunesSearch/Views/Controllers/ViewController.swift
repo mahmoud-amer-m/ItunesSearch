@@ -9,7 +9,7 @@
 import UIKit
 
 class ViewController: BaseViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    var selectedEntities: [String] = []
+    var selectedEntities: [Entity] = []
     
     @IBOutlet weak var mainView: UIView!
     @IBOutlet weak var searchTexhField: UITextField!
@@ -36,9 +36,9 @@ class ViewController: BaseViewController, UICollectionViewDelegate, UICollection
             self?.selectedEntities = entities
             self?.collectionView.reloadData()
         }
+        //If preiously selected, reload with selected
         if (selectedEntities.count > 0) {
-            entitiesController.selectedEntities = self.selectedEntities
-            entitiesController.reloadEntities()
+            entitiesController.reloadEntities(selectedEntities: selectedEntities)
         }
         navigationController?.pushViewController(entitiesController, animated: true)
     }
@@ -65,7 +65,7 @@ extension ViewController {
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let size = (selectedEntities[indexPath.item] as NSString).size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize:20)])
+        let size = (selectedEntities[indexPath.item].entityName as NSString).size(withAttributes: [NSAttributedStringKey.font: UIFont.systemFont(ofSize:20)])
 
         return CGSize(width: size.width, height: size.height + 4)
     }
@@ -80,7 +80,7 @@ extension ViewController {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "entitiesIdCell",
                                                       for: indexPath) as! CollectionViewCell
         cell.backgroundColor = UIColor(red: 28/255, green: 135/255, blue: 212/255, alpha: 1)
-        cell.cellLabel.text = selectedEntities[indexPath.item]
+        cell.cellLabel.text = selectedEntities[indexPath.item].entityName
         return cell
     }
 }

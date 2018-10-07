@@ -14,7 +14,7 @@ import Reachability
 
 class ServicesManager {
     
-    public static func searchAPI(entity: String, parameters: [String: Any], completion: @escaping (SearchBaseModel)->(), apiError: @escaping (String)->()) {
+    public static func searchAPI(parameters: [String: Any], completion: @escaping (SearchBaseModel)->(), apiError: @escaping (String)->()) {
         
         let reachability = Reachability()
         if reachability?.connection == .none ||  reachability?.connection.description == "No Connection"{
@@ -34,7 +34,7 @@ class ServicesManager {
                         let baseModel = try JSONDecoder().decode(SearchBaseModel.self, from: jsonData)
                         guard let results = baseModel.results,
                             !results.isEmpty else {
-                                apiError(String.init(format: ErrorsConstants.noResponseError.rawValue, (parameters["term"] as? CVarArg) ?? ""))
+                                apiError(String.init(format: ErrorsConstants.noResponseError.rawValue, arguments: [(parameters["term"] as? CVarArg) ?? "", (parameters["entity"] as? CVarArg) ?? ""]))
                                 return
                         }
                         completion(baseModel)

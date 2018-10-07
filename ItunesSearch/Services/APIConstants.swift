@@ -20,7 +20,7 @@ public class UIConstants {
 enum ErrorsConstants: String {
     case networkError = "No internet connection"
     case jsonError = "Sorry, Something went wrong :("
-    case noResponseError = "No results found for your search %@"
+    case noResponseError = "No results found for your search %@ in %@"
     case missingEnterdDataMessage = "Please write search text and select at least one category"
     case missingEnterdDataTitle = "Missing Data"
 }

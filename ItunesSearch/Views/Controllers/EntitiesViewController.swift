@@ -9,9 +9,8 @@
 import UIKit
 
 class EntitiesViewController: UITableViewController {
-    let entities: [String] = ["Album", "Artist", "Book", "Movie", "Music", "musicVideo", "Video", "Podcast", "Song"]
-    var selectedEntities: [String] = []
-    var setEntities: (([String]) -> Void)?
+    var entities: [Entity] = [Entity(name: "All"), Entity(name: "Album"), Entity(name: "Artist"), Entity(name: "Book"), Entity(name: "Movie"), Entity(name: "Music"), Entity(name: "musicVideo"), Entity(name: "Video"), Entity(name: "Podcast"), Entity(name: "Song")]
+    var setEntities: (([Entity]) -> Void)?
     
     
     override func viewDidLoad() {
@@ -23,8 +22,15 @@ class EntitiesViewController: UITableViewController {
         navigationItem.titleView = imageView
     }
     
-    func reloadEntities() {
-        tableView.reloadData()
+    func reloadEntities(selectedEntities: [Entity]) {
+        for (index, entity) in entities.enumerated() {
+            if selectedEntities.filter({ $0.entityName == entity.entityName }).first != nil {
+                entities[index].isSelected = true
+            }
+        }
+        if checkIfAllSelected() {
+            entities[0].isSelected = true
+        }
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -33,18 +39,48 @@ class EntitiesViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CellIdentifier", for: indexPath)
-        cell.textLabel?.text = entities[indexPath.row]
-        cell.accessoryType = selectedEntities.contains(entities[indexPath.row]) ? .checkmark : .none
+        let entity: Entity = entities[indexPath.row]
+        cell.textLabel?.text = entity.entityName
+        if indexPath.row == 0 {
+            cell.accessoryType = checkIfAllSelected() ? .checkmark : .none
+        } else {
+            cell.accessoryType = entity.isSelected ? .checkmark : .none
+        }
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if selectedEntities.contains(entities[indexPath.row]) {
-            selectedEntities = selectedEntities.filter { $0 != entities[indexPath.row] }
-        } else {
-            selectedEntities.append(entities[indexPath.row])
+        entities[indexPath.row].isSelected = !entities[indexPath.row].isSelected
+        if indexPath.row == 0
+        {
+            for (index, _) in entities.enumerated() {
+                entities[index].isSelected = entities[indexPath.row].isSelected
+            }
         }
-        setEntities?(selectedEntities)
+        setEntities!(createEntitiesForRequest().filter({ $0.isSelected == true }))
         tableView.reloadData()
+    }
+    
+    func createEntitiesForRequest() -> [Entity] {
+        var returnArray: [Entity] = entities
+        if entities.filter({ $0.entityName == "All" }).first != nil {
+            returnArray.removeFirst()
+        }
+        return returnArray
+    }
+    
+    func checkIfAllSelected() -> Bool {
+        return !(entities.filter({ $0.entityName != "All" }).filter({ $0.isSelected == false }).count > 0)
+    }
+}
+
+
+
+struct Entity
+{
+    var entityName:String
+    var isSelected:Bool! = false
+    init(name:String) {
+        self.entityName = name
     }
 }

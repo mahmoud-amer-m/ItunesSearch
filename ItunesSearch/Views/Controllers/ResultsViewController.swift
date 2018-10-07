@@ -21,7 +21,7 @@ enum listingStyle {
 }
 
 class ResultsViewController: BaseViewController, UITableViewDelegate, UITableViewDataSource {
-    var selectedEntities: [String]?
+    var selectedEntities: [Entity]?
     var keyword: String?  // Search keyword from home screen
     
     var results: NSMutableArray? // Search results Array
@@ -71,7 +71,7 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
     }
     
     func search() {
-        guard let categories: [String] = selectedEntities else {return}
+        guard let categories: [Entity] = selectedEntities else {return}
         guard categories.count > 0 else {return}
         let searchGroup = DispatchGroup()
         results = NSMutableArray()
@@ -79,8 +79,8 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
         
         for (index, entity) in categories.enumerated() {
             searchGroup.enter()
-            let parameters: [String: Any] = ["term": keyword ?? "", "entity" : entity]
-            ServicesManager.searchAPI(entity: entity, parameters: parameters, completion: { (searchModel) in
+            let parameters: [String: Any] = ["term": keyword ?? "", "entity" : entity.entityName]
+            ServicesManager.searchAPI(parameters: parameters, completion: { (searchModel) in
                 self.results?.add(["index" : index, "searchModel": searchModel])
                 searchGroup.leave()
             }) { (error) in
@@ -124,7 +124,7 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
 extension ResultsViewController {
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return selectedEntities?[section] ?? ""
+        return selectedEntities?[section].entityName ?? ""
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
