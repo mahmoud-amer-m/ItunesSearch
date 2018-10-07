@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+class ViewController: BaseViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     var selectedEntities: [String] = []
     
     @IBOutlet weak var mainView: UIView!
@@ -49,6 +49,8 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
                                                                         bundle: nil).instantiateViewController(withIdentifier: "ResultsViewController") as! ResultsViewController
             resultsController.search(entities: selectedEntities, keyword: keyword)
             navigationController?.pushViewController(resultsController, animated: true)
+        } else {
+            showAlert(title: "Missing Data", message: "Please write search text and select at least one category", buttonTitle: "Ok", action: nil)
         }
     }
 }

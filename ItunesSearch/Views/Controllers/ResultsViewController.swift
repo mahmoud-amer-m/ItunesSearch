@@ -21,10 +21,12 @@ enum listingStyle {
 }
 
 class ResultsViewController: BaseViewController, UITableViewDelegate, UITableViewDataSource {
-    var selectedEntities: [String] = []
-    var results: NSMutableArray?
-    var errorsArray: NSMutableArray?
-    var keyword: String?
+    var selectedEntities: [String] = [] // Entites selected from home screen
+    var keyword: String?  // Search keyword from home screen
+    
+    var results: NSMutableArray? // Search results Array
+    var errorsArray: NSMutableArray? // Errors Array
+    
     var viewState = Dynamic(ViewState.loading)
     var listingStyle: listingStyle = .grid
     
@@ -32,11 +34,15 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //iTuens Header Logo
         addItunesLogoToNavigation()
+        //Tableview cell height, content inset
         tableView.contentInset = UIEdgeInsetsMake(0.0, 0.0, 0.0, 0.0)
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = UITableViewAutomaticDimension
         
+        
+        //Viewstate that controls the screen
         viewState.bind {[weak self] (state) in
             DispatchQueue.main.async {
                 switch state {
@@ -65,45 +71,35 @@ class ResultsViewController: BaseViewController, UITableViewDelegate, UITableVie
         selectedEntities = entities
         self.keyword = keyword
         
-        let downloadGroup = DispatchGroup()
-        let _ = DispatchQueue.global(qos: .userInitiated)
-
-        let queue = DispatchQueue(label: "myQueue", qos: .userInteractive, attributes: .concurrent)
-        queue.async {
-            DispatchQueue.concurrentPerform(iterations: self.selectedEntities.count) {
-                index in
-                self.results = NSMutableArray()
-                self.errorsArray = NSMutableArray()
-                downloadGroup.enter()
-                let entity = entities[index]
-                let parameters: [String: Any] = ["term": keyword, "entity" : entity]
-                ServicesManager.searchAPI(entity: entity, parameters: parameters, completion: { (searchModel) in
-                    self.results?.add(searchModel)
-                    downloadGroup.leave()
-                }) { (error) in
-                    self.errorsArray?.add(error)
-                    downloadGroup.leave()
-                }
-                downloadGroup.notify(queue: DispatchQueue.main) {
-                    if let searchResults = self.results,
-                        searchResults.count > 0 {
-                        self.viewState.value = .finishedLoadingSuccessfully(results: searchResults)
-                    } else {
-                        DispatchQueue.main.async {
-                            self.hideLoadingView()
-                            self.showAlert(title: "erro", message: "Empty Results", buttonTitle: "Try Again", action: { _ in
-                                self.search(entities: self.selectedEntities, keyword: self.keyword ?? "")
-                            })
-                        }
-                    }
-                    
+        let searchGroup = DispatchGroup()
+        results = NSMutableArray()
+        errorsArray = NSMutableArray()
+        
+        for (index, entity) in selectedEntities.enumerated() {
+            searchGroup.enter()
+            let parameters: [String: Any] = ["term": keyword, "entity" : entity]
+            ServicesManager.searchAPI(entity: entity, parameters: parameters, completion: { (searchModel) in
+                self.results?.add(searchModel)
+                searchGroup.leave()
+            }) { (error) in
+                self.errorsArray?.add(["index" : index, "error": error])
+                searchGroup.leave()
+            }
+        }
+        searchGroup.notify(queue: .main) {
+            if let searchResults = self.results,
+                searchResults.count > 0 {
+                self.viewState.value = .finishedLoadingSuccessfully(results: searchResults)
+            } else {
+                DispatchQueue.main.async {
+                    self.hideLoadingView()
+                    self.showAlert(title: "error", message: "Empty Results", buttonTitle: "Try Again", action: { _ in
+                        self.showLoading()
+                        self.search(entities: self.selectedEntities, keyword: self.keyword ?? "")
+                    })
                 }
             }
         }
-        DispatchQueue.concurrentPerform(iterations: selectedEntities.count) { index in
-            
-        }
-        
     }
 
     override func didReceiveMemoryWarning() {
@@ -146,10 +142,9 @@ extension ResultsViewController {
             let sectionResults = results?[indexPath.section] as? SearchBaseModel {
             return constructCellWith(tableView: tableView, at: indexPath, resultArray: sectionResults)
         } else {
-            if let errors = errorsArray,
-                errors.count > indexPath.section,
-                let error: String = errors[indexPath.section] as? String {
-                return constructEmptyCell(tableView: tableView, at: indexPath, message: error)
+            if let errors: [[String : Any]] = errorsArray as? [[String : Any]],
+                let error: [String : Any] = errors.filter( { ($0["index"] as! Int) == indexPath.section } ).first {
+                return constructEmptyCell(tableView: tableView, at: indexPath, message: (error["error"] as? String) ?? "")
             } else {
                 return constructEmptyCell(tableView: tableView, at: indexPath, message: "Empty Results")
             }
