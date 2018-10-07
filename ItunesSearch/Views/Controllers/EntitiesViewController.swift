@@ -28,9 +28,7 @@ class EntitiesViewController: UITableViewController {
                 entities[index].isSelected = true
             }
         }
-        if checkIfAllSelected() {
-            entities[0].isSelected = true
-        }
+        entities[0].isSelected = checkIfAllSelected()
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
